@@ -4,3 +4,7 @@ block layout-content
   div.content
     h1.banner Overview
     p="🦄🦄🦄🦄🦄🦄🦄"
+    hr
+    each val in data
+      h2= val.subject
+      p= val.content

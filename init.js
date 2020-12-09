@@ -67,24 +67,52 @@ const dbPromiseReady = new Promise((resolve, reject) => {
   db = new sqlite3.Database("storage.db", (err) => {
     if (err) {
       console.error(err);
-      reject(err);
-      return process.exit();
+      return reject(err);
     }
 
     db.run(`CREATE TABLE IF NOT EXISTS users (
-      id INT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
       password_hash TEXT NOT NULL,
       password_salt TEXT NOT NULL,
       display_name TEXT NOT NULL
-    )`, err => {
+    )`, (err, res) => {
       if (err) {
         console.error(err);
-        reject(err);
-      } else {
-        console.log("DB connected");
-        resolve();
+        return reject(err);
       }
+
+        db.get("SELECT id FROM users LIMIT 1", (err, row) => {
+          if(row){
+            console.log("Existing DB connected");
+            return resolve();
+          }
+        db.serialize(() => {
+          db.run(`CREATE TABLE posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            content TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          )`);
+
+          db.run(`INSERT INTO users (username, display_name, password_hash, password_salt) VALUES (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)`,
+          ["lb1", "LB User 1","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
+          "lb2", "LB User 2","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
+          "lb3", "LB User 3","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb"]);
+
+          db.run(`INSERT INTO posts (user_id, subject, content) VALUES
+           (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)`,
+          [1, "Post 1", "Hallo",
+          2, "Post 2", "Super",
+          1, "Post 3", ":)",
+          2, "Post 4", "Lgjdshfkjsd",
+          3, "Post 5", "<b>AHHHH</b>",]);
+
+          console.log("New DB connected");
+          return resolve();
+        });
+      });
     });
   })
 });
@@ -95,8 +123,10 @@ app.use((req, res, next) => {
   return next();
 })
 
+const isAuth = req => req.cookies.SessionId && req.session.username;
+
 const auth = (req, res, next) => {
-  if (req.cookies.SessionId && req.session.username)
+  if (isAuth(req))
     return next();
   res.status(401).render("error", {
     msg: "Unauthorized 401"
@@ -104,7 +134,9 @@ const auth = (req, res, next) => {
 };
 
 app.get("/", (req, res) => {
-  return res.render('index');
+  db.all("SELECT * FROM posts ORDER BY id desc", (err, rows) => {
+    return res.render('index', { data: rows });
+  });
 });
 
 app.get("/secret", auth, (req, res) => {
