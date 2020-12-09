@@ -1,0 +1,21 @@
+extends layout
+
+block layout-content
+  div.content
+    h1.banner Register
+    form.form(method="post")
+      .form-group.row
+        label.col-md-2.col-form-label(for="displayname") Display name
+        div.col-md-4
+          input.form-control(id="displayname", name="displayname", type="text", required)
+      .form-group.row
+        label.col-md-2.col-form-label(for="username") Username
+        div.col-md-4
+          input.form-control(id="username", name="username", type="text", required)
+      .form-group.row
+        label.col-md-2.col-form-label(for="password") Passwort
+        div.col-md-4
+          input.form-control(id="password", name="password", type="password", required)
+      .form-group.row
+        .col-md-6
+          input.btn.btn-primary(type="submit")

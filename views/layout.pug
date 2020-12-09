@@ -1,0 +1,43 @@
+block variables
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    title #{title || "🦄"} 
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.4/umd/popper.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js")
+  body.container
+    header
+      nav.navbar.navbar-expand-lg.navbar-light.bg-light
+        //- a.navbar-brand(href='#') Test Login
+        button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
+          span.navbar-toggler-icon
+        
+        .collapse.navbar-collapse(id='navbarSupportedContent')
+          ul.navbar-nav.mr-auto
+            li.nav-item(class={active: url == "/"})
+              a.nav-link(href='/') Home
+            if session.username
+              li.nav-item(class={active: url == "/secret"})
+                a.nav-link(href='/secret') Secret
+
+          ul.navbar-nav.float-right
+            if session.username
+              li.nav-item
+                span.navbar-text=session.displayName
+              li.nav-item(class={active: url == "/logout"})
+                a.nav-link(href='/logout') Logout
+            else
+              li.nav-item(class={active: url == "/login"})
+                a.nav-link(href='/login') Login
+              li.nav-item(class={active: url == "/register"})
+                a.nav-link(href='/register') Register
+            //- li.nav-item.dropdown
+            //-   a.nav-link.dropdown-toggle(id='navbarDropdownMenuLink', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') Accounts
+            //-   .dropdown-menu(aria-labelledby='navbarDropdownMenuLink')
+            //-     a.dropdown-item(href='#') Settings
+    #root.container
+      block layout-content

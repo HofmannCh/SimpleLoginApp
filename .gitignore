@@ -1,3 +1,6 @@
+sessions/
+storage.db
+
 # Logs
 logs
 *.log
