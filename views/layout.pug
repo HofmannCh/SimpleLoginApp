@@ -4,29 +4,36 @@ html
   head
     meta(charset="utf-8")
     meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-    title #{title || "🦄"} 
+    title #{title || "🦄"}
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.4/umd/popper.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js")
   body.container
     header
-      nav.navbar.navbar-expand-lg.navbar-light.bg-light
-        //- a.navbar-brand(href='#') Test Login
+      nav.navbar.navbar-expand-md.navbar-light.bg-light
+        a.navbar-brand(href='/') Simple login app
+
+        if session.username
+          .nav-item.d-block.d-md-none.float-right
+            span.navbar-text=session.displayName
+
         button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
           span.navbar-toggler-icon
-        
+
         .collapse.navbar-collapse(id='navbarSupportedContent')
           ul.navbar-nav.mr-auto
-            li.nav-item(class={active: url == "/"})
-              a.nav-link(href='/') Home
             if session.username
               li.nav-item(class={active: url == "/secret"})
                 a.nav-link(href='/secret') Secret
+              li.nav-item(class={active: url == "/createPost"})
+                a.nav-link(href='/createPost') Create post
 
-          ul.navbar-nav.float-right
+          ul.navbar-nav.float-md-right
             if session.username
-              li.nav-item
+              li.nav-item.d-none.d-md-block
                 span.navbar-text=session.displayName
               li.nav-item(class={active: url == "/logout"})
                 a.nav-link(href='/logout') Logout
@@ -35,9 +42,5 @@ html
                 a.nav-link(href='/login') Login
               li.nav-item(class={active: url == "/register"})
                 a.nav-link(href='/register') Register
-            //- li.nav-item.dropdown
-            //-   a.nav-link.dropdown-toggle(id='navbarDropdownMenuLink', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') Accounts
-            //-   .dropdown-menu(aria-labelledby='navbarDropdownMenuLink')
-            //-     a.dropdown-item(href='#') Settings
     #root.container
       block layout-content

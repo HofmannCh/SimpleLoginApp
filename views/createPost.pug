@@ -1,0 +1,28 @@
+extends layout
+
+block layout-content
+  link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/jodit/3.4.25/jodit.min.css")
+  script(src="//cdnjs.cloudflare.com/ajax/libs/jodit/3.4.25/jodit.min.js")
+  div.content
+    h1.banner= (id ? "Edit post 📪" : "Create post 📫")
+    label(type="hidden", id="content_raw", value=content)
+    form.form(method="post")
+      input(type="hidden", id="id", name="id", value=id)
+      .form-group.row
+        label.col-md-2.col-form-label(for="subject") Subject
+        div.col-md-4
+          input.form-control(id="subject", name="subject", type="text", required, value=subject)
+      .form-group.row
+        label.col-md-2.col-form-label(for="content") Content
+        div.col-md-10
+          textarea#content(name="content", required)
+      .form-group.row
+        label.col-md-2.col-form-label(for="timestamp") Timespamp
+        div.col-md-4
+          input.form-control(id="timestamp", name="timestamp", type="timestamp", required, placeholder="DD.MM.YYYY hh:mm", value=timestamp)
+      .form-group.row
+        .col-md-6
+          input.btn.btn-primary(type="submit")
+  script.
+    var editor = new Jodit('#content');
+    editor.value = document.getElementById("content_raw").getAttribute("value");
