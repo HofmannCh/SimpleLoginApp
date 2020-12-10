@@ -14,7 +14,8 @@ module.exports = new Promise((resolve,reject) => {
         username TEXT NOT NULL,
         password_hash TEXT NOT NULL,
         password_salt TEXT NOT NULL,
-        display_name TEXT NOT NULL
+        display_name TEXT NOT NULL,
+        is_admin INT NOT NULL
       )`, (err, res) => {
         if (err) {
           console.error(err);
@@ -36,10 +37,10 @@ module.exports = new Promise((resolve,reject) => {
               FOREIGN KEY (user_id) REFERENCES users(id)
             )`);
   
-            db.run(`INSERT INTO users (username, display_name, password_hash, password_salt) VALUES (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)`,
-            ["lb1", "LB User 1","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
-            "lb2", "LB User 2","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
-            "lb3", "LB User 3","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb"]);
+            db.run(`INSERT INTO users (username, display_name, password_hash, password_salt, is_admin) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)`,
+            ["lb1", "LB User 1","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb", 1,
+            "lb2", "LB User 2","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb", 0,
+            "lb3", "LB User 3","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb", 0]);
   
             db.run(`INSERT INTO posts (user_id, subject, content, timestamp) VALUES
              (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)`,

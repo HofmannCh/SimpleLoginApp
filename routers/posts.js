@@ -26,7 +26,7 @@ router.get("/", (req, res) => {
             data: rows.map(x => {
                 x.timestamp = moment.unix(x.timestamp).format(dateTimeFormat);
                 x.content = sanitizeHtml(x.content, sanitizeHtmlSettins);
-                if (a && x.user_id == req.session.userId) {
+                if (a && (req.session.isAdmin || x.user_id == req.session.userId)) {
                     x.edit = "/createPost/" + x.id;
                     x.delete = "/delete/" + x.id;
                 }
@@ -38,10 +38,6 @@ router.get("/", (req, res) => {
 
 router.use(util.auth);
 
-router.get("/secret", (req, res) => {
-    return res.render("secret");
-});
-
 router.get("/createPost/:id?", (req, res) => {
     const id = req.params.id;
     if (!id) {
@@ -50,7 +46,12 @@ router.get("/createPost/:id?", (req, res) => {
         });
     }
 
-    req.db.get("SELECT * FROM posts WHERE id = ? AND user_id = ?", [id, req.session.userId], (err, row) => {
+    req.db.get(req.session.isAdmin ?
+        "SELECT * FROM posts WHERE id = ?" :
+        "SELECT * FROM posts WHERE id = ? AND user_id = ?", 
+        req.session.isAdmin ?
+        [id] :
+        [id, req.session.userId], (err, row) => {
         if (err) {
             return res.status(500).render("error", {
                 msg: "Error creating"
@@ -94,13 +95,20 @@ router.post("/createPost/:id?", (req, res) => {
         return;
     }
 
-    req.db.run(`
-    UPDATE posts SET
+    req.db.run(req.session.isAdmin ?
+    `UPDATE posts SET
         subject = ?,
         content = ?,
         timestamp = ?
-    WHERE id = ? AND user_id = ?
-    `, [subject, content, timestamp, id, req.session.userId], (err) => {
+    WHERE id = ?` :
+    `UPDATE posts SET
+        subject = ?,
+        content = ?,
+        timestamp = ?
+    WHERE id = ? AND user_id = ?`,
+    req.session.isAdmin ?
+    [subject, content, timestamp, id] :
+    [subject, content, timestamp, id, req.session.userId], (err) => {
         if (err) {
             return res.status(500).render("error", {
                 msg: "Error updating"

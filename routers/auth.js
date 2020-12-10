@@ -31,6 +31,8 @@ router.post("/login", (req, res) => {
         req.session.username = row.username;
         req.session.userId = row.id;
         req.session.displayName = row.display_name;
+        req.session.isAdmin = !!row.is_admin;
+        
         req.session.save(err => {
             if (err)
                 return res.status(500).render("error", {
@@ -48,6 +50,7 @@ router.get("/logout", (req, res) => {
         req.session.destroy();
         return res.redirect('/');
     }
+    
     return res.redirect('/login');
 });
 
@@ -69,7 +72,7 @@ router.post("/register", (req, res) => {
         const salt = crypto.randomBytes(6).toString("hex");
         const hash = sha.sha256(pepper + password + salt);
 
-        req.db.run("INSERT INTO users (username, password_hash, password_salt, display_name) VALUES (?, ?, ?, ?)", [username, hash, salt, displayName], (err, inf) => {
+        req.db.run("INSERT INTO users (username, password_hash, password_salt, display_name, is_admin) VALUES (?, ?, ?, ?, ?)", [username, hash, salt, displayName, 0], function (err) {
             if (err)
                 return res.status(500).render("error", {
                     msg: err
@@ -77,7 +80,9 @@ router.post("/register", (req, res) => {
 
             req.session.username = username;
             req.session.displayName = displayName;
-            req.session.userId = inf.lastID;
+            req.session.isAdmin = false;
+            req.session.userId = this.lastID;
+
             return res.redirect("/");
         });
     });
