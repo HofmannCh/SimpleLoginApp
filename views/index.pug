@@ -2,7 +2,7 @@ extends layout
 
 block layout-content
   div.content
-    h1.banner Overview 🦄🦄🦄
+    h1.banner Overview 🦄
     each val in data
       h4
         if val.edit
@@ -11,7 +11,8 @@ block layout-content
         if val.delete
           a.btn.btn-sm.btn-danger.mr-2(href=val.delete)
             i.fas.fa-trash
-        =`${val.timestamp} - ${val.subject}`
-        small=` - By: ${val.displayname}`
+        ="📝 "
+        =val.subject
+      p(style="font-size: .95em")=`📅 ${val.timestamp} - By: 🧙‍♂️ ${val.displayname}`
       div.mb-5.pl-2(style="border-left: darkgray solid 4px; max-height: 200px; position: relative; overflow: auto")
         div!= val.content

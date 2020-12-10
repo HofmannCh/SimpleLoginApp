@@ -16,7 +16,6 @@ const sanitizeHtmlSettins = {
 
 router.get("/", (req, res) => {
     req.db.all(`SELECT p.*, u.display_name AS displayname FROM posts AS p LEFT JOIN users AS u ON u.id = p.user_id ORDER BY p.timestamp DESC`, (err, rows) => {
-        console.log(rows);
         if (err)
             return res.status(500).render("error", {
                 msg: "Error display"
