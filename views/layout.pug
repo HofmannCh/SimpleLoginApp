@@ -6,9 +6,11 @@ html
     meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
     title #{title || "🦄"}
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.4/umd/popper.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js")
   body.container
     header
       nav.navbar.navbar-expand-md.navbar-light.bg-light
@@ -26,6 +28,8 @@ html
             if session.username
               li.nav-item(class={active: url == "/secret"})
                 a.nav-link(href='/secret') Secret
+              li.nav-item(class={active: url == "/createPost"})
+                a.nav-link(href='/createPost') Create post
 
           ul.navbar-nav.float-md-right
             if session.username

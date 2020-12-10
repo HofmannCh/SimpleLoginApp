@@ -1,19 +1,16 @@
 const express = require("express");
 const path = require('path');
 const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const sessionFileStore = require('session-file-store');
-const sha = require('js-sha256');
 // const pug = require('pug');
 const moment = require("moment");
 const morgan = require("morgan");
 
 const port = 4455;
-const pepper = "abd4761e-95ce-4d40-9e54-59cf8189439e";
 
 const app = express();
 app.use(bodyParser.urlencoded({
@@ -62,161 +59,20 @@ app.use(morgan((tokens, req, res) => [
     })
 }));
 
-let db = undefined;
-const dbPromiseReady = new Promise((resolve, reject) => {
-  db = new sqlite3.Database("storage.db", (err) => {
-    if (err) {
-      console.error(err);
-      return reject(err);
-    }
-
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      password_salt TEXT NOT NULL,
-      display_name TEXT NOT NULL
-    )`, (err, res) => {
-      if (err) {
-        console.error(err);
-        return reject(err);
-      }
-
-        db.get("SELECT id FROM users LIMIT 1", (err, row) => {
-          if(row){
-            console.log("Existing DB connected");
-            return resolve();
-          }
-        db.serialize(() => {
-          db.run(`CREATE TABLE posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            subject TEXT NOT NULL,
-            content TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-          )`);
-
-          db.run(`INSERT INTO users (username, display_name, password_hash, password_salt) VALUES (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)`,
-          ["lb1", "LB User 1","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
-          "lb2", "LB User 2","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb",
-          "lb3", "LB User 3","843faa74b89a86d856b4aa5fd3b9ce6608fe5dad0c6e2b49fa97afb83e841440", "18a1a57c97fb"]);
-
-          db.run(`INSERT INTO posts (user_id, subject, content) VALUES
-           (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)`,
-          [1, "Post 1", "Hallo",
-          2, "Post 2", "Super",
-          1, "Post 3", ":)",
-          2, "Post 4", "Lgjdshfkjsd",
-          3, "Post 5", "<b>AHHHH</b>",]);
-
-          console.log("New DB connected");
-          return resolve();
-        });
-      });
-    });
-  })
-});
-
 app.use((req, res, next) => {
   if (res.cookies && req.cookies.SessionId && !req.session.username)
     delete res.cookies.SessionId;
   return next();
 })
 
-const isAuth = req => req.cookies.SessionId && req.session.username;
-
-const auth = (req, res, next) => {
-  if (isAuth(req))
+require("./util/db").then(db => {
+  app.use((req, res, next) => {
+    req.db = db;
     return next();
-  res.status(401).render("error", {
-    msg: "Unauthorized 401"
   });
-};
 
-app.get("/", (req, res) => {
-  db.all("SELECT * FROM posts ORDER BY id desc", (err, rows) => {
-    return res.render('index', { data: rows });
-  });
-});
+  app.use(require("./routers/auth"));
+  app.use(require("./routers/posts"));
 
-app.get("/secret", auth, (req, res) => {
-  return res.render('secret');
-});
-
-app.get("/login", (req, res) => {
-  if (req.session.username)
-    return res.redirect("/");
-  return res.render('login');
-});
-
-app.post("/login", (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-    if (!row)
-      return res.status(404).render("error", {
-        msg: "Invalid username"
-      });
-
-    const hash = sha.sha256(pepper + password + row.password_salt);
-
-    if (hash !== row.password_hash)
-      return res.status(404).render("error", {
-        msg: "Invalid password"
-      });
-
-    req.session.username = row.username;
-    req.session.displayName = row.display_name;
-    req.session.save(err => {
-      if (err)
-        return res.status(500).render("error", {
-          msg: err
-        });
-
-      return res.redirect("/");
-    });
-  });
-});
-
-app.get("/logout", (req, res) => {
-  if (req.session.username && req.cookies.SessionId) {
-    res.clearCookie('SessionId');
-    req.session.destroy();
-    return res.redirect('/');
-  }
-  return res.redirect('/login');
-});
-
-app.get("/register", (req, res) => {
-  return res.render('register');
-});
-
-app.post("/register", (req, res) => {
-  const displayName = req.body.displayname;
-  const username = req.body.username;
-  const password = req.body.password;
-
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-    if (row)
-      return res.status(404).render("error", {
-        msg: "Username taken"
-      });
-
-    const salt = crypto.randomBytes(6).toString("hex");
-    const hash = sha.sha256(pepper + password + salt);
-
-    db.run("INSERT INTO users (username, password_hash, password_salt, display_name) VALUES (?, ?, ?, ?)", [username, hash, salt, displayName], err => {
-      if (err)
-        return res.status(500).render("error", {
-          msg: err
-        });
-
-      req.session.username = username;
-      req.session.displayName = displayName;
-      return res.redirect("/");
-    });
-  });
-});
-
-dbPromiseReady.then(() => app.listen(port, () => console.log("Server running on " + port)))
+  app.listen(port, () => console.log("Server running on http://localhost:" + port));
+})
