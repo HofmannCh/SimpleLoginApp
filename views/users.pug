@@ -1,0 +1,30 @@
+extends layout
+
+block layout-content
+  div.content
+    h1.banner="Users "
+      .fas.fa-users-cog.smoll
+    table.table
+      thead
+        tr
+          th Id
+          th Displayname
+          th Username
+          th Is Admin
+          th Actions
+      tbody
+        each val in data
+          tr
+            td=val.id 
+            td=val.display_name 
+            td=val.username 
+            td 
+              if val.is_admin
+                i.far.fa-check-square
+              else
+                i.far.fa-square
+            td
+              a.btn.btn-sm.btn-primary.mr-2(href="/user/edit/" + val.id )
+                i.fas.fa-edit
+              a.btn.btn-sm.btn-danger(href="/user/delete/" + val.id)
+                i.fas.fa-trash

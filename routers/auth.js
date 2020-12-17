@@ -59,12 +59,12 @@ router.get("/register", (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-    const displayName = req.body.displayname;
+    const displayName = req.body.display_name;
     const username = req.body.username;
     const password = req.body.password;
 
     req.db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-        if (row)
+        if (err || row)
             return res.status(404).render("error", {
                 msg: "Username taken"
             });

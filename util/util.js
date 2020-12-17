@@ -8,7 +8,16 @@ const auth = (req, res, next) => {
   });
 };
 
+const admin = (req, res, next) => {
+  if (isAuth(req) && req.session.isAdmin)
+    return next();
+  res.status(401).render("error", {
+    msg: "Unauthorized 401"
+  });
+};
+
 module.exports = {
     isAuth,
-    auth
+    auth,
+    admin
 };

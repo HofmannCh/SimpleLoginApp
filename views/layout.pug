@@ -29,8 +29,11 @@ html
         .collapse.navbar-collapse(id='navbarSupportedContent')
           ul.navbar-nav.mr-auto
             if session.username
-              li.nav-item(class={active: url == "/createPost"})
-                a.nav-link(href='/createPost') Create post
+              li.nav-item(class={active: url.startsWith("/post/edit")})
+                a.nav-link(href='/post/edit') Create post
+              if session.isAdmin
+                li.nav-item(class={active: url == "/user"})
+                  a.nav-link(href='/user') Users
 
           ul.navbar-nav.float-md-right
             if session.username
