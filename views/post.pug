@@ -4,7 +4,12 @@ block layout-content
   link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/jodit/3.4.25/jodit.min.css")
   script(src="//cdnjs.cloudflare.com/ajax/libs/jodit/3.4.25/jodit.min.js")
   div.content
-    h1.banner= (id ? "Edit post 📪" : "Create post 📫")
+    if id
+      h1.banner="Edit post "
+        i.fas.fa-edit.smoll
+    else
+      h1.banner="Create post "
+        i.fas.fa-plus.smoll
     label(type="hidden", id="content_raw", value=content)
     form.form(method="post")
       input(type="hidden", id="id", name="id", value=id)

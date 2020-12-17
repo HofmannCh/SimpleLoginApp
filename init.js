@@ -73,6 +73,7 @@ require("./util/db").then(db => {
 
   app.use(require("./routers/auth"));
   app.use(require("./routers/posts"));
+  app.use(require("./routers/users"));
 
   app.listen(port, () => console.log("Server running on http://localhost:" + port));
 })

@@ -2,12 +2,13 @@ extends layout
 
 block layout-content
   div.content
-    h1.banner Register 🔑
+    h1.banner="Register "
+      i.fas.fa-key.smoll
     form.form(method="post")
       .form-group.row
-        label.col-md-2.col-form-label(for="displayname") Display name
+        label.col-md-2.col-form-label(for="display_name") Display name
         div.col-md-4
-          input.form-control(id="displayname", name="displayname", type="text", required)
+          input.form-control(id="display_name", name="display_name", type="text", required)
       .form-group.row
         label.col-md-2.col-form-label(for="username") Username
         div.col-md-4

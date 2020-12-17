@@ -22,13 +22,13 @@ router.get("/", (req, res) => {
             });
 
         const a = util.isAuth(req);
-        return res.render("index", {
+        return res.render("posts", {
             data: rows.map(x => {
                 x.timestamp = moment.unix(x.timestamp).format(dateTimeFormat);
                 x.content = sanitizeHtml(x.content, sanitizeHtmlSettins);
-                if (a && x.user_id == req.session.userId) {
-                    x.edit = "/createPost/" + x.id;
-                    x.delete = "/delete/" + x.id;
+                if (a && (req.session.isAdmin || x.user_id == req.session.userId)) {
+                    x.edit = "/post/edit/" + x.id;
+                    x.delete = "/post/delete/" + x.id;
                 }
                 return x;
             })
@@ -38,19 +38,20 @@ router.get("/", (req, res) => {
 
 router.use(util.auth);
 
-router.get("/secret", (req, res) => {
-    return res.render("secret");
-});
-
-router.get("/createPost/:id?", (req, res) => {
+router.get("/post/edit/:id?", (req, res) => {
     const id = req.params.id;
     if (!id) {
-        return res.render("createPost", {
+        return res.render("post", {
             timestamp: moment().format(dateTimeFormat)
         });
     }
 
-    req.db.get("SELECT * FROM posts WHERE id = ? AND user_id = ?", [id, req.session.userId], (err, row) => {
+    req.db.get(req.session.isAdmin ?
+        "SELECT * FROM posts WHERE id = ?" :
+        "SELECT * FROM posts WHERE id = ? AND user_id = ?", 
+        req.session.isAdmin ?
+        [id] :
+        [id, req.session.userId], (err, row) => {
         if (err) {
             return res.status(500).render("error", {
                 msg: "Error creating"
@@ -64,11 +65,11 @@ router.get("/createPost/:id?", (req, res) => {
         row.timestamp = moment.unix(row.timestamp).format(dateTimeFormat)
         row.content = sanitizeHtml(row.content, sanitizeHtmlSettins);
 
-        return res.render("createPost", row);
+        return res.render("post", row);
     });
 });
 
-router.post("/createPost/:id?", (req, res) => {
+router.post("/post/edit/:id?", (req, res) => {
     const id = req.body.id;
     const subject = req.body.subject;
     const content = req.body.content;
@@ -79,7 +80,6 @@ router.post("/createPost/:id?", (req, res) => {
             msg: "Invalid date"
         });
 
-    console.log(id);
     if (!id) {
         req.db.run(`INSERT INTO posts (user_id, subject, content, timestamp) VALUES (?, ?, ?, ?)`,
             [req.session.userId, subject, content, timestamp], (err) => {
@@ -94,13 +94,20 @@ router.post("/createPost/:id?", (req, res) => {
         return;
     }
 
-    req.db.run(`
-    UPDATE posts SET
+    req.db.run(req.session.isAdmin ?
+    `UPDATE posts SET
         subject = ?,
         content = ?,
         timestamp = ?
-    WHERE id = ? AND user_id = ?
-    `, [subject, content, timestamp, id, req.session.userId], (err) => {
+    WHERE id = ?` :
+    `UPDATE posts SET
+        subject = ?,
+        content = ?,
+        timestamp = ?
+    WHERE id = ? AND user_id = ?`,
+    req.session.isAdmin ?
+    [subject, content, timestamp, id] :
+    [subject, content, timestamp, id, req.session.userId], (err) => {
         if (err) {
             return res.status(500).render("error", {
                 msg: "Error updating"
@@ -109,11 +116,9 @@ router.post("/createPost/:id?", (req, res) => {
 
         return res.redirect("/");
     });
-
-    console.log(id, subject, content, timestamp.toString());
 });
 
-router.get("/delete/:id", (req, res) => {
+router.get("/post/delete/:id", (req, res) => {
     req.db.run("DELETE FROM posts WHERE id = ? AND user_id = ?", [req.params.id, req.session.userId], (err) => {
         if (err) {
             return res.status(500).render("error", {

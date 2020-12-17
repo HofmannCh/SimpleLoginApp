@@ -18,7 +18,10 @@ html
 
         if session.username
           .nav-item.d-block.d-md-none.float-right
-            span.navbar-text=session.displayName
+            span.navbar-text
+            if session.isAdmin
+              i.fas.fa-key.mr-1.smoll.text-danger
+            =session.displayName
 
         button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
           span.navbar-toggler-icon
@@ -26,15 +29,19 @@ html
         .collapse.navbar-collapse(id='navbarSupportedContent')
           ul.navbar-nav.mr-auto
             if session.username
-              li.nav-item(class={active: url == "/secret"})
-                a.nav-link(href='/secret') Secret
-              li.nav-item(class={active: url == "/createPost"})
-                a.nav-link(href='/createPost') Create post
+              li.nav-item(class={active: url.startsWith("/post/edit")})
+                a.nav-link(href='/post/edit') Create post
+              if session.isAdmin
+                li.nav-item(class={active: url == "/user"})
+                  a.nav-link(href='/user') Users
 
           ul.navbar-nav.float-md-right
             if session.username
               li.nav-item.d-none.d-md-block
-                span.navbar-text=session.displayName
+                span.navbar-text
+                  if session.isAdmin
+                    i.fas.fa-key.mr-1.smoll.text-danger
+                  =session.displayName
               li.nav-item(class={active: url == "/logout"})
                 a.nav-link(href='/logout') Logout
             else
@@ -44,3 +51,7 @@ html
                 a.nav-link(href='/register') Register
     #root.container
       block layout-content
+  style.
+    .smoll {
+      font-size: .85em;
+    }

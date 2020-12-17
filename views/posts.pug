@@ -1,0 +1,23 @@
+extends layout
+
+block layout-content
+  div.content
+    h1.banner="Posts "
+      .far.fa-clipboard.smoll
+    each val in data
+      h4.border-bottom.pb-1
+        =val.subject
+        span.float-right
+          if val.edit
+            a.mr-2.text-primary(href=val.edit)
+              i.fas.fa-edit.smoll
+          if val.delete
+            a.mr-2.text-danger(href=val.delete)
+              i.fas.fa-trash.smoll
+      p(style="font-size: .95em")
+        i.far.fa-calendar
+        =` ${val.timestamp} - `
+        i.far.fa-user
+        =` ${val.displayname}`
+      div.mb-5.pl-2(style="border-left: var(--secondary) solid 4px; max-height: 200px; position: relative; overflow: auto")
+        div!= val.content
