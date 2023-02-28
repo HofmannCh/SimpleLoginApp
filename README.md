@@ -28,6 +28,15 @@ It is a simple app which contains a post read which is public and a post create 
   * Logs requests
   * Database Sqlite3
 
+# Logins
+The following default users are seeded in the DB:
+|User|Password|
+|----|--------|
+|lb1 |sml12345|
+|lb2 |sml12345|
+|lb3 |sml12345|
+
+
 # Start
 > git clone https://github.com/HofmannCh/SimpleLoginApp.git
 
@@ -36,3 +45,6 @@ It is a simple app which contains a post read which is public and a post create 
 > npm i
 
 > npm run start
+
+The following default users are created:
+
